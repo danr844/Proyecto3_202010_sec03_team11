@@ -10,6 +10,7 @@ public class Vertex<T extends Comparable<T>, V extends Comparable<V>> implements
 	private int color;
 	private Edge<T,V> edge; 
 	private double Distance;
+	private LinkedList<Comparendo>ComparendosList;
 	
 	private LinkedList<Edge<T, V>> adjacencyList;
 
@@ -18,6 +19,7 @@ public class Vertex<T extends Comparable<T>, V extends Comparable<V>> implements
 		idVertex = id;
 		infoVertex = pInfoVertex;
 		adjacencyList = new LinkedList<Edge<T,V>>();
+		ComparendosList = new LinkedList<>();
 			
 	}
 	
@@ -25,6 +27,15 @@ public class Vertex<T extends Comparable<T>, V extends Comparable<V>> implements
 		return idVertex;
 	}
 	
+	public void addComparendo(Comparendo comparendo){
+		ComparendosList.put(comparendo);
+	}
+	public int getComparendosNumber(){
+		return ComparendosList.size();
+	}
+	public LinkedList<Comparendo>getComparendosList(){
+		return ComparendosList;
+	}
 	public V getInfo(){
 		return infoVertex;
 	}
@@ -64,7 +75,7 @@ public class Vertex<T extends Comparable<T>, V extends Comparable<V>> implements
 	}
 	public void addEdge(Edge<T,V>edge){
 		if(adjacencyList.contains(edge)){
-			adjacencyList.get(edge).changeCost(edge.getCost());
+			adjacencyList.get(edge).changeDistanceCost(edge.getDistanceCost());
 		}
 		else{
 			adjacencyList.put(edge);

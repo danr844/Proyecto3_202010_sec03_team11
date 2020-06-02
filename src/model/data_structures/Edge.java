@@ -2,17 +2,19 @@ package model.data_structures;
 
 public class Edge <T extends Comparable<T>,V extends Comparable<V>> implements Comparable<Edge<T,V>>{
 
-	private double cost;
+	private double distanceCost;
+	private int costByComparendos;
 	private T ID;
 	private Vertex<T, V> initialVertex;
 	private Vertex<T,V> finalVertex;
 	
 	
-	public Edge (T pID, Vertex<T,V> pInitialVertex, Vertex<T,V> pFinalVertex, double pCost){
+	public Edge (T pID, Vertex<T,V> pInitialVertex, Vertex<T,V> pFinalVertex, double pCost, int costComp){
 		initialVertex = pInitialVertex;
 		finalVertex = pFinalVertex;
-		cost = pCost;
+		distanceCost = pCost;
 		ID = pID;
+		costByComparendos =costComp;
 	}
 	
 	
@@ -28,12 +30,15 @@ public class Edge <T extends Comparable<T>,V extends Comparable<V>> implements C
 		return finalVertex;
 	}
 	
-	public double getCost(){
-		return cost;
+	public double getDistanceCost(){
+		return distanceCost;
 	}
 	
-	public void changeCost(double pCost){
-		cost = pCost;
+	public void changeCostByComparendo(int pCost){
+		costByComparendos = pCost;
+	}
+	public void changeDistanceCost(double pCost){
+		distanceCost = pCost;
 	}
 	
 	

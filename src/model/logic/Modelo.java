@@ -27,6 +27,7 @@ import model.data_structures.Edge;
 import model.data_structures.GeographicPoint;
 import model.data_structures.GrafoNoDirigido;
 import model.data_structures.Haversine;
+import model.data_structures.LinkedList;
 import model.data_structures.Maps;
 import model.data_structures.RedBlackBST;
 import model.data_structures.Vertex;
@@ -100,6 +101,7 @@ public class Modelo
 			double longitude=Double.parseDouble(vertex[1].trim());
 			double latitude=Double.parseDouble(vertex[2].trim());
 			graphRead.addVertex(objectId, new GeographicPoint(longitude,latitude));
+			graphRead.addVertexNewKey(latitude-longitude, objectId,new GeographicPoint(longitude, latitude) );
 			line=br.readLine();
 		}
 		br.close();
@@ -126,7 +128,7 @@ public class Modelo
 			{
 				int idFinalVertex=Integer.parseInt(edges[i].trim());
 				GeographicPoint geo2=graphRead.getVertex(idFinalVertex).getInfo();
-				graphRead.addEdge(idVertexInit, idVertexInit, idFinalVertex, Haversine.distance(geo1.getlatitude(), geo1.getLongitude(), geo2.getlatitude(), geo2.getLongitude()));
+				graphRead.addEdge(idVertexInit, idVertexInit, idFinalVertex, Haversine.distance(geo1.getlatitude(), geo1.getLongitude(), geo2.getlatitude(), geo2.getLongitude()), graphRead.getVertex(idVertexInit).getComparendosNumber()+graphRead.getVertex(idFinalVertex).getComparendosNumber());
 			}
 			line=br.readLine();
 		}
@@ -212,7 +214,7 @@ public class Modelo
 				JsonObject arc = new JsonObject();
 				Edge<Integer,GeographicPoint> edge = it.next();
 				arc.addProperty("VERTICE_DESTINO", edge.getFinalVertex().getID());
-				arc.addProperty("COSTO", edge.getCost());
+				arc.addProperty("COSTO", edge.getDistanceCost());
 				list.add(arc);
 			}
 
@@ -260,7 +262,7 @@ public class Modelo
 				double costo = arc.get("COSTO").getAsDouble();
 				if(!graphWrite.containsVertex(destino))
 					graphWrite.addVertex(destino, null);
-				graphWrite.addEdge(objectId,objectId, destino, costo);
+				graphWrite.addEdge(objectId,objectId, destino, costo,0);
 			}
 		}
 	}
@@ -272,7 +274,6 @@ public class Modelo
 	{
 		Maps mapa = new Maps(graphWrite, null);
 		mapa.initFrame();
-
 	}
 
 	/**
@@ -283,9 +284,47 @@ public class Modelo
 		Maps mapa = new Maps(graphWrite, estacionesPolRedBlack);
 		mapa.initFrame();
 	}
+	public void generateMapComparendos(){
+		Maps mapa = new Maps(graphWrite, comparendosRedBlack,0);
+		mapa.initFrame();
+	}
+	public Vertex<Integer,GeographicPoint> IdNearestVertex(double lat, double Long){
+		Double key = lat-Long;
+		Vertex<Integer, GeographicPoint>vertex = graphRead.getVertexNewKey(key);
+		if(vertex==null)
+		{
+			boolean salir=false;
+			int i =0;
+			Iterator<Double> iter = graphRead.keyInRange(key, key).iterator()
+					;
+			while(salir==false)
+			{
+				iter = graphRead.keyInRange(key-i, key+i).iterator();
+				i++;
+				if(iter.hasNext())
+					salir = true;
+			}
+			while(iter.hasNext()){
+				Double vertex1 = iter.next();
+				double distance =100000;
+				if((vertex1-key)<distance)
+					vertex = graphRead.getVertexNewKey(vertex1);
+			}
+		}
+		return vertex;
+	}
 
-
-
+	public void cargarComparendosEnvertice() throws FileNotFoundException, ParseException{
+		Iterator<Comparendo>iter= comparendosRedBlack.keysValue().iterator();
+		while(iter.hasNext()){
+			Comparendo comp = iter.next();
+			IdNearestVertex(comp.darlatitud(), comp.darLongitud()).addComparendo(comp);
+		}
+		
+	}
+	public LinkedList<Comparendo> getVertexComparendos(int IDVertex){
+		return graphRead.getVertex(IDVertex).getComparendosList();
+	}
 	public GrafoNoDirigido<Integer, GeographicPoint> getGraphRead(){
 		return graphRead;
 	}
@@ -295,6 +334,7 @@ public class Modelo
 	public RedBlackBST<Integer, estacionPolicia> getEstacionesDePolicia(){
 		return estacionesPolRedBlack;
 	}
+	
 
 
 }

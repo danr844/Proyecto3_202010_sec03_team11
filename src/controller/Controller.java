@@ -1,10 +1,12 @@
 package controller;
 
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.text.ParseException;
 import java.util.Scanner;
 
 import com.sun.glass.events.ViewEvent;
+import com.sun.javafx.collections.MappingChange.Map;
 
 import model.data_structures.Comparendo;
 import model.data_structures.GeographicPoint;
@@ -35,7 +37,7 @@ public class Controller {
 		modelo = new Modelo();
 	}
 
-	public void run() throws ParseException 
+	public void run() throws ParseException, FileNotFoundException 
 	{
 		Scanner lector = new Scanner(System.in);
 		boolean fin = false;
@@ -67,9 +69,8 @@ public class Controller {
 
 				if(maximo!=null){
 					view.printMessage("El comparendo con mayor ID es:" + maximo.darID()+ "\n "+maximo.darFecha() + "\n "+ maximo.darLocalidad()+ "\n "+ maximo.darInfraccion()  );
-
-
 				}
+				modelo.cargarComparendosEnvertice();
 				break;
 			case 2:
 				view.printMessage("------------------------------------------------------------------------\n Se esta cargando la informacion con las estaciones de policia: \n------------------------------------------------------------------------");
@@ -120,6 +121,11 @@ public class Controller {
 				view.printMessage("El programa fue cerrado.");
 				lector.close();
 				fin=true;
+				break;
+
+			case 8:
+				view.printMessage("Se esta cargando la informacion de comparendos en su vertice correspondiente.");
+				modelo.cargarComparendosEnvertice();
 				break;
 
 			default: 
