@@ -52,6 +52,12 @@ public class GrafoNoDirigido<T extends Comparable<T>, V extends Comparable<V>> {
 			throw new IllegalArgumentException("vertex " + v + " is not between 0 and " + (vertexNumber-1));
 	}
 
+	public boolean containsVertex(T v) {
+		if (!tableVertex.contains(v))
+			return false;
+		return true;
+	}
+
 	/**
 	 * Adds the undirected edge v-w to this graph.
 	 *
@@ -61,7 +67,6 @@ public class GrafoNoDirigido<T extends Comparable<T>, V extends Comparable<V>> {
 	 */
 	public void addEdge(T idEdge, T initialVertex, T finalVertex, double cost) {
 		validateVertex(initialVertex);
-		validateVertex(finalVertex);
 		Vertex<T, V>vertex1 =tableVertex.get(initialVertex);
 		Vertex<T, V>vertex2 =tableVertex.get(finalVertex);
 

@@ -4,11 +4,17 @@ package model.logic;
 
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.UnsupportedEncodingException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.Iterator;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
@@ -17,10 +23,13 @@ import com.google.gson.JsonParser;
 import com.google.gson.stream.JsonReader;
 
 import model.data_structures.Comparendo;
+import model.data_structures.Edge;
 import model.data_structures.GeographicPoint;
 import model.data_structures.GrafoNoDirigido;
 import model.data_structures.Haversine;
+import model.data_structures.Maps;
 import model.data_structures.RedBlackBST;
+import model.data_structures.Vertex;
 import model.data_structures.estacionPolicia;
 
 /**
@@ -173,8 +182,115 @@ public class Modelo
 
 		return mayorID1;
 	}
-	public GrafoNoDirigido<Integer, GeographicPoint> getGraph(){
+
+
+	//ACLARACI√ìN PRELIMINAR: El siguiente c√≥digo fue realizado con base en el c√≥digo de la p√°gina http://javainutil.blogspot.com/2013/03/java-escribir-un-json.html
+	/**
+	 * M√©todo que imprime los valores de las ubicaciones guardadas en el grafo.
+	 * pre: Se inicializa la lista de estaciones.
+	 * @param pRutaImpresion Ruta en donde se va a imprimir el archivo JSON.
+	 * @throws IOException 
+	 */
+	public void saveGraphJson(String pRutaImpresion) throws IOException
+	{
+		FileWriter fw = new FileWriter(pRutaImpresion);
+
+		JsonObject graph = new JsonObject();
+		JsonArray array = new JsonArray();
+
+		for (int i = 0; i < 50000; i++) 
+		{
+			JsonObject obj = new JsonObject();
+			obj.addProperty("OBJECT_ID", i);
+			obj.addProperty("LATITUD", graphRead.getVertex(i).getInfo().getlatitude());
+			obj.addProperty("LONGITUD", graphRead.getVertex(i).getInfo().getLongitude());
+
+			Iterator<Edge<Integer,GeographicPoint>> it = graphRead.getVertex(i).getAdjacencyList().iterator();
+			JsonArray list = new JsonArray();
+			while(it.hasNext())
+			{
+				JsonObject arc = new JsonObject();
+				Edge<Integer,GeographicPoint> edge = it.next();
+				arc.addProperty("VERTICE_DESTINO", edge.getFinalVertex().getID());
+				arc.addProperty("COSTO", edge.getCost());
+				list.add(arc);
+			}
+
+			obj.add("ARCOS",list);
+			array.add(obj);
+		}
+
+		graph.add("features", array);
+		fw.write(graph.toString());
+		fw.flush();
+		fw.close();
+	}
+
+	/**
+	 * MÈtodo que carga los valores del JSON a un grafo.
+	 * @param ruta Ruta del JSON
+	 * @throws UnsupportedEncodingException
+	 * @throws FileNotFoundException
+	 * @throws ParseException
+	 */
+	public void loadGraphJson(String ruta) throws UnsupportedEncodingException, FileNotFoundException, ParseException
+	{
+		JsonReader lector = new JsonReader(new InputStreamReader(new FileInputStream(ruta)));
+		JsonObject obj = JsonParser.parseReader(lector).getAsJsonObject();
+
+		JsonArray arregloVertices = obj.get("features").getAsJsonArray();  
+
+		for (JsonElement e: arregloVertices) 	
+		{
+			JsonObject propiedades = e.getAsJsonObject();
+
+			int objectId = propiedades.get("OBJECT_ID").getAsInt();
+			double latitud = propiedades.get("LATITUD").getAsDouble();
+			double longitud = propiedades.get("LONGITUD").getAsDouble();
+			if(graphWrite.containsVertex(objectId))
+				graphWrite.getVertex(objectId).changeInfo(new GeographicPoint(longitud, latitud));
+			else
+				graphWrite.addVertex(objectId, new GeographicPoint(longitud,latitud));
+
+			JsonArray arcos = propiedades.get("ARCOS").getAsJsonArray();
+			for (int i = 0; i < arcos.size() ; i++)
+			{
+				JsonObject arc = arcos.get(i).getAsJsonObject();
+				int destino = arc.get("VERTICE_DESTINO").getAsInt();
+				double costo = arc.get("COSTO").getAsDouble();
+				if(!graphWrite.containsVertex(destino))
+					graphWrite.addVertex(destino, null);
+				graphWrite.addEdge(objectId,objectId, destino, costo);
+			}
+		}
+	}
+
+	/**
+	 * MÈtodo que genera el mapa de arcos y vÈrtices.  Ya se encuentran inicializados.
+	 */
+	public void generateMap()
+	{
+		Maps mapa = new Maps(graphWrite, null);
+		mapa.initFrame();
+
+	}
+
+	/**
+	 * MÈtodo que genera el mapa de arcos, vÈrtices y estaciones de policÌa. Ya se encuentran inicializados.
+	 */
+	public void generateMapWithPoliceStations()
+	{
+		Maps mapa = new Maps(graphWrite, estacionesPolRedBlack);
+		mapa.initFrame();
+	}
+
+
+
+	public GrafoNoDirigido<Integer, GeographicPoint> getGraphRead(){
 		return graphRead;
+	}
+	public GrafoNoDirigido<Integer, GeographicPoint> getGraphWrite(){
+		return graphWrite;
 	}
 	public RedBlackBST<Integer, estacionPolicia> getEstacionesDePolicia(){
 		return estacionesPolRedBlack;

@@ -2,6 +2,7 @@ package test.logic;
 
 import static org.junit.Assert.*;
 
+import java.io.IOException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -20,9 +21,13 @@ public class TestModelo {
 	private Comparendo nueva2;
 	private String fechaS;
 	private String fechaS2;
+	private static final String vertexPath= "./data/bogota_vertices.txt";
+	private static final String EdgesPath= "./data/bogota_arcos.txt";
+	private static final String EstacionesPath= "./data/estacionpolicia.geojson.json";
+	private static final String GraphSavepath = "./data/grafoImpreso.json";
 
 	SimpleDateFormat parser = new SimpleDateFormat("yyyy/MM/dd");
-	RedBlackBST<Integer,Comparendo> tree = modelo.giveTree();
+	public RedBlackBST<Integer,Comparendo> tree = new RedBlackBST<>();
 
 
 
@@ -36,8 +41,8 @@ public class TestModelo {
 		Date fecha = parser.parse(fechaS);
 		Date fecha2 = parser.parse(fechaS2);
 
-		nueva = new Comparendo(1234, fecha, "hola2", "hola3", "hola4", "hola5", "hola", "hola7", "Barrios Unidos", "Chia");
-		nueva2 = new Comparendo(0000, fecha2, "0009", "0008", "0007", "0006", "0005", "0004", "Fontibon", "Mosquera");
+		nueva = new Comparendo(1234, fecha, "hola2", "hola3", "hola4", "hola5", "hola", "hola7", "Barrios Unidos", "Chia", 0, 0, 0);
+		nueva2 = new Comparendo(0000, fecha2, "0009", "0008", "0007", "0006", "0005", "0004", "Fontibon", "Mosquera", 0, 0, 0);
 		tree.put(nueva.darID(),nueva);
 		tree.put(nueva2.darID(),nueva2);
 
@@ -54,7 +59,7 @@ public class TestModelo {
 	public void testDarTamano() throws ParseException {
 		// TODO
 		setUp1();
-		assertEquals("No tiene el tamaño esperado", 2, modelo.giveSizeRedBlackBST());
+		assertEquals("No tiene el tamaño esperado", 2, tree.size(tree.giveRoot()));
 
 	}
 
@@ -63,12 +68,12 @@ public class TestModelo {
 	{
 		// TODO Completar la prueba
 		setUp1();
-		assertEquals("No tiene el tamaño esperado", 2, modelo.giveSizeRedBlackBST());
+		assertEquals("No tiene el tamaño esperado", 2, tree.size(tree.giveRoot()));
 		String fecha1 = "2019/02/13";
 		Date fecha = parser.parse(fecha1);
-		Comparendo nueva3 = new Comparendo(1, fecha, "hola2", "hola3", "hola4", "hola5", "hola", "hola7", "Suba", "Cota");
+		Comparendo nueva3 = new Comparendo(1, fecha, "hola2", "hola3", "hola4", "hola5", "hola", "hola7", "Suba", "Cota", 0, 0, 0);
 		tree.put(nueva3.darID(), nueva3);
-		assertEquals("No tiene el tamaño esperado", 3, modelo.giveSizeRedBlackBST());
+		assertEquals("No tiene el tamaño esperado", 3, tree.size(tree.giveRoot()));
 
 
 	}
@@ -78,15 +83,30 @@ public class TestModelo {
 	{
 		setUp1();
 		// TODO Completar la prueba
-		assertNotNull("El objeto no deberia ser null1", modelo.getKey(nueva.darID()));
-		assertNotNull("El objeto no deberia ser null1", modelo.getKey(nueva2.darID()));
-		assertNull("El objeto no deberia ser distinto de null", modelo.getKey(nueva.darID()+1));
+		assertNotNull("El objeto no deberia ser null1", tree.get(nueva.darID()));
+		assertNotNull("El objeto no deberia ser null1", tree.get(nueva2.darID()));
+		assertNull("El objeto no deberia ser distinto de null", tree.get(nueva.darID()+1));
 	}
 
 	@Test
-	public void testCargarInfo() throws ParseException {
+	public void testCargarInfoVerticesYArcos() throws ParseException, IOException {
 		setUp1();
-		assertNotNull("la informacion no fue cargada", modelo.cargarInfo());
+		modelo.cargarInfoVertex(vertexPath);
+		modelo.cargarInfoEdges(EdgesPath);
+		assertNotNull("la informacion no fue cargada", modelo.getGraphRead().getEdgeSize());
+	}
+	@Test
+	public void testCargarInfoEstacionesDePolicia() throws ParseException, IOException {
+		setUp1();
+		modelo.cargarInfoEstacionesPolicia(EstacionesPath);
+		assertNotNull("la informacion no fue cargada", modelo.getEstacionesDePolicia().giveSize());
+	}
+	@Test
+	public void testCargarEImprimirGson() throws ParseException, IOException {
+		setUp1();
+		modelo.saveGraphJson(GraphSavepath);
+		modelo.loadGraphJson(GraphSavepath);
+		assertNotNull("la informacion no fue cargada", modelo.getGraphWrite().getEdgeSize());
 	}
 
 }

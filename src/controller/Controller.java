@@ -4,7 +4,11 @@ import java.io.IOException;
 import java.text.ParseException;
 import java.util.Scanner;
 
+import com.sun.glass.events.ViewEvent;
+
 import model.data_structures.Comparendo;
+import model.data_structures.GeographicPoint;
+import model.data_structures.GrafoNoDirigido;
 import model.logic.Modelo;
 import view.View;
 
@@ -18,6 +22,7 @@ public class Controller {
 	private static final String vertexPath= "./data/bogota_vertices.txt";
 	private static final String EdgesPath= "./data/bogota_arcos.txt";
 	private static final String EstacionesPath= "./data/estacionpolicia.geojson.json";
+	private static final String GraphSavepath = "./data/grafoImpreso.json";
 
 
 	/**
@@ -56,9 +61,9 @@ public class Controller {
 					// TODO Auto-generated catch block
 					view.printMessage("El archivo de carga de arcos no fue encontrado o no pudo ser leido");;
 				}
-				
-				view.printMessage("Se cargaron "+ modelo.getGraph().getVertexSize()+" vertices");
-				view.printMessage("Se cargaron "+ modelo.getGraph().getEdgeSize()+" arcos");
+
+				view.printMessage("Se cargaron "+ modelo.getGraphRead().getVertexSize()+" vertices");
+				view.printMessage("Se cargaron "+ modelo.getGraphRead().getEdgeSize()+" arcos");
 
 				if(maximo!=null){
 					view.printMessage("El comparendo con mayor ID es:" + maximo.darID()+ "\n "+maximo.darFecha() + "\n "+ maximo.darLocalidad()+ "\n "+ maximo.darInfraccion()  );
@@ -73,28 +78,48 @@ public class Controller {
 				break;
 
 			case 3:
-//				view.printMessage("------------------------------------------------------------------------\n Ingrese el ID minimo que desea buscar: \n------------------------------------------------------------------------");
-//				int IdMinimo = lector.nextInt();
-//				view.printMessage("------------------------------------------------------------------------\n Ingrese el ID maximo que desea buscar: \n------------------------------------------------------------------------");
-//				int IdMaximo = lector.nextInt();
-//				Queue<Comparendo>datos= modelo.comparendosEnRango(IdMinimo, IdMaximo);
-//				while(!datos.isEmpty()){
-//					Comparendo buscado1=datos.dequeue();
-//					view.printMessage("------------------------------------------------------------------------\n El comparendo encontrado es:\n" +buscado1.darID() +" \n "  +buscado1.darFecha() +"\n " + buscado1.darTipoServicio()+"\n "+ buscado1.darClaseVehiculo()+"\n"+buscado1.darInfraccion()+"\n"+"------------------------------------------------------------------------");
-//
-//				}
 
+				view.printMessage("------------------------------------------------------------------------\n Se esta generando el mapa: \n------------------------------------------------------------------------");
+				modelo.generateMap();
 				break;
 			case 4:
-				
-//				view.printMessage(modelo.giveSizeRedBlackBST()+" Es el tamanio del RedBlackBST ");
-//				view.printMessage(modelo.giveHeight()+" es la altura del RedBlackBST ");
-//				view.printMessage(modelo.alturaPromedio()+" es la altura promedio del RedBlackBST \n \n \n");
-//				break;
+
+				view.printMessage("Se esta generando el mapa con las estaciones de policia");
+				modelo.generateMapWithPoliceStations();
+				break;
 			case 5:
-//				view.printMessage("El programa fue cerrado.");
-//				lector.close();
-//				fin=true;
+
+				view.printMessage("Guardar grafo (persistir en un archivo JSON) ");
+				try 
+				{
+					modelo.saveGraphJson(GraphSavepath);
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					view.printMessage("El archivo de impresion del grafo no pudo ser creado");
+				};
+				view.printMessage("El grafo fue guardado en un archivo en formato Json. La ruta del archivo es"+ GraphSavepath);
+				break;
+			case 6:
+
+				view.printMessage("Cargar Grafo (Solo disponible si el grafo fue previamente guardado en un archivo formato JSON)");
+				try 
+				{
+					modelo.loadGraphJson(GraphSavepath);
+					GrafoNoDirigido<Integer, GeographicPoint> graphLoaded = modelo.getGraphWrite();
+					view.printMessage("El numero de vertices del grafo cargado es: "+ graphLoaded.getVertexSize() );
+					view.printMessage("El numero de arcos del grafo cargado es: "+ graphLoaded.getEdgeSize() );
+
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					view.printMessage("El archivo: "+ GraphSavepath+" no pudo ser encontrado.");
+				}
+				view.printMessage("El grafo fue cargado correctamente");
+				break;
+
+			case 7:
+				view.printMessage("El programa fue cerrado.");
+				lector.close();
+				fin=true;
 				break;
 
 			default: 

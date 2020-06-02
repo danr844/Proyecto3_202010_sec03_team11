@@ -13,11 +13,13 @@ public class View
 	    }
 	    public void printMenu()
 		{
-			System.out.println("1. Carga de datos");
-			System.out.println("2. Requerimiento funcional 2");
-			System.out.println("3. Requerimiento funcional 3");
-			System.out.println("4. Dar Informacion del RedBlackBST");
-			System.out.println("5. Exit");
+			System.out.println("1. Cargar informacion comparendos, vertices y arcos en el grafo");
+			System.out.println("2. Cargar informacion estaciones de policia");
+			System.out.println("3. Generar mapa.");
+			System.out.println("4. Generar Mapa con estaciones de policia.");
+			System.out.println("5. Guardar grafo en un archivo de formato Json.");
+			System.out.println("6. Cargar grafo previamente guardado.");
+			System.out.println("7. Exit");
 			System.out.println("------------------------------------------------------------------------");
 			System.out.println("Dar el numero de opcion a resolver, luego oprimir tecla Return: (e.g., 1):");
 			System.out.println("------------------------------------------------------------------------");
